@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Movie List</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css">
+</head>
+<body>
+    <!-- Include Navbar -->
+    <div id="navbar"></div>
+
+    <div class="container mt-4">
+        <div class="btn-group mb-4" role="group" aria-label="Genre Filters">
+            <button type="button" class="btn btn-secondary me-2" data-genre-id="">All</button>
+            <button type="button" class="btn btn-secondary me-2" data-genre-id="28">Action</button>
+            <button type="button" class="btn btn-secondary me-2" data-genre-id="35">Comedy</button>
+            <button type="button" class="btn btn-secondary me-2" data-genre-id="18">Drama</button>
+            <button type="button" class="btn btn-secondary me-2" data-genre-id="12">Adventure</button>
+            <button type="button" class="btn btn-secondary me-2" data-genre-id="10751">Family</button>
+            <button type="button" class="btn btn-secondary me-2" data-genre-id="16">Animation</button>
+            <button type="button" class="btn btn-secondary me-2" data-genre-id="27">Horror</button>
+            <button type="button" class="btn btn-secondary me-2" data-genre-id="878">Science Fiction</button>
+            <!-- Add more genre buttons as needed -->
+        </div>
+
+        <div class="mb-4">
+            <input type="text" class="form-control" id="search-input" placeholder="Search movies by title...">
+        </div>
+
+        <div class="row" id="movie-cards">
+            <!-- Movie cards will be displayed here -->
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../js/main.js"></script>
+    <script>
+        // Load navbar without jQuery
+        document.addEventListener("DOMContentLoaded", function() {
+            fetch("../components/navbar.html")
+                .then(response => response.text())
+                .then(data => {
+                    document.getElementById("navbar").innerHTML = data;
+                    addGenreFilterEventListeners(); // Call the function to add event listeners
+                    setupSearch(); // Call the setup search function
+                })
+                .catch(error => console.error("Error loading navbar:", error));
+
+            // Fetch movies when the page loads
+            fetchMovies(); // Load all movies initially
+        });
+
+        // Function to add event listeners for genre buttons
+        function addGenreFilterEventListeners() {
+            const genreButtons = document.querySelectorAll('.btn-group button');
+            genreButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const genreId = this.getAttribute('data-genre-id');
+                    filterMoviesByGenre(genreId);
+                });
+            });
+        }
+
+        // Function to set up the search functionality
+        function setupSearch() {
+            const searchInput = document.getElementById('search-input');
+            searchInput.addEventListener('input', function() {
+                const searchTerm = this.value.toLowerCase(); // Get the search term
+                filterMoviesBySearch(searchTerm); // Call the filter function
+            });
+        }
+
+        // Function to filter movies based on the search term
+        function filterMoviesBySearch(searchTerm) {
+            const movieCards = document.querySelectorAll('#movie-cards .movie-card'); // Select all movie cards
+            movieCards.forEach(card => {
+                const title = card.querySelector('.card-title').textContent.toLowerCase(); // Get the title of each card
+                if (title.includes(searchTerm)) {
+                    card.style.display = 'block'; // Show card if it matches the search term
+                } else {
+                    card.style.display = 'none'; // Hide card if it doesn't match
+                }
+            });
+        }
+
+        // Example of how to create movie cards, adjust as necessary
+        function displayMovies(movies) {
+            const movieCardsContainer = document.getElementById('movie-cards');
+            movieCardsContainer.innerHTML = ''; // Clear existing cards
+
+            movies.forEach(movie => {
+                const movieCard = document.createElement('div');
+                movieCard.classList.add('col-md-4', 'mb-4', 'movie-card'); // Add the movie-card class for filtering
+
+                movieCard.innerHTML = `
+                    <div class="card">
+                        <img src="https://image.tmdb.org/t/p/w500${movie.poster_path}" class="card-img-top" alt="${movie.title}">
+                        <div class="card-body">
+                            <h5 class="card-title">${movie.title}</h5>
+                            <button class="btn btn-primary" onclick="viewDetails(${movie.id})">View Details</button>
+                        </div>
+                    </div>
+                `;
+                movieCardsContainer.appendChild(movieCard);
+            });
+        }
+    </script>
+</body>
+</html>
